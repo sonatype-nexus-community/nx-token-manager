@@ -15,18 +15,17 @@ currentuser_hastoken_endpoint = 'userTokens/currentUser/hasToken'
 
 def get_args():
     
-    global iq_server, iq_user, iq_passwd, mode, iq_realm, expire_tokens, period
+    global iq_server, iq_user, iq_passwd, mode, iq_realm, expire, age
 
     parser = argparse.ArgumentParser(description='Manage your Nexus IQ tokens')
 
     parser.add_argument('-s', '--server', help='', default='http://localhost:8070', required=False)
     parser.add_argument('-u', '--user', default='admin', help='', required=False)
     parser.add_argument('-p', '--passwd', default='admin123', required=False)
-    parser.add_argument('-m', '--mode', help='', default='get_all', required=False)
+    parser.add_argument('-m', '--mode', help='', default='list', required=False)
     parser.add_argument('-r', '--realm', help='', default='Internal', required=False) # SAML, Crowd, <LDAP Server Id>
-    #parser.add_argument('-e', '--expire', default=False,  required=False)
     parser.add_argument('-e', '--expire', action='store_true')
-    parser.add_argument('--period', default=365, type=int, required=False)
+    parser.add_argument('-a', '--age', default=365, type=int, required=False)
 
     args = vars(parser.parse_args())
 
@@ -35,8 +34,8 @@ def get_args():
     iq_passwd = args['passwd']
     mode = args['mode']
     iq_realm = args['realm']
-    expire_tokens = args['expire']
-    period = args['period']
+    expire = args['expire']
+    age = args['age']
 
     return
 
@@ -95,20 +94,15 @@ def create_token():
 
         if status_code == 200:
             print(data)
-            # userCode = data['userCode']
-            # passCode = data['passCode']
 
     return
 
 
-def delete_token():
+def delete_token(endpoint):
+    status_code, data = http_request('delete', currentuser_token_endpoint)
 
-    if user_has_token():
-
-        status_code, data = http_request('delete', currentuser_token_endpoint)
-
-        if status_code == 204:
-            print("Token successfully deleted")
+    if status_code == 204:
+        print("Token successfully deleted")
 
     return
 
@@ -132,9 +126,6 @@ def get_tokens(filter):
     if status_code == 200:
         tokens = data
 
-        for token in tokens:
-            print(token)
-
     return tokens
 
 
@@ -147,7 +138,7 @@ def get_query_date():
     print("The current date and time is:", current_dt)
     print("The current timestamp (secs) is:", current_ts)
 
-    previous_ts = current_ts - (period*oneday)
+    previous_ts = current_ts - (age * oneday)
 
     previous_dt = datetime.fromtimestamp(previous_ts)
     previous_dt_str = previous_dt.strftime("%Y-%d-%m")
@@ -159,6 +150,23 @@ def get_query_date():
     return previous_dt_str
 
 
+def expire_tokens(tokens):
+
+    for token in tokens:
+        print(token)
+
+        if expire:
+            user_code = token['userCode']
+            user_name = token['username']
+
+            endpoint = 'userTokens/userCode/' + user_code
+
+            print("Removing token [username=" + user_name + "] [userCode=" + user_code + "]")
+            delete_token(currentuser_token_endpoint)
+
+    return
+
+
 def main():
     get_args()
 
@@ -167,13 +175,17 @@ def main():
             create_token()
         
         case 'delete':
-            delete_token()
+            if user_has_token():
+                delete_token(currentuser_token_endpoint)
 
-        case 'get':
-            get_tokens('for_expiry')
+        case 'expire':
+            tokens = get_tokens('for_expiry')
+            expire_tokens(tokens)
 
-        case 'get_all':
-            get_tokens('all')
+        case 'list':
+            tokens = get_tokens('all')
+            for token in tokens:
+                print(token)
 
         case _:
             print("invalid mode")
