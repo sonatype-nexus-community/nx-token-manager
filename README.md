@@ -6,11 +6,11 @@ Python 3.10+
 
 ### Defaults
 
-- -u = admin
-- -p = admin123
-- -s = http://localhost:8070
-- -m = Mode 
-- -r = Internal IQ Authentication realm
+- -u = admin (Nexus IQ user name)
+- -p = admin123 (Nexus IQ user password)
+- -s = http://localhost:8070 (Nexus IQ server url)
+- -m = listx (list 'expired' tokens)
+- -r = Internal (IQ Authentication realm)
 - -a = 365 (period at which tokens expire - days)
 
 ### Examples
