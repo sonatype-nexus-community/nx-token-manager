@@ -1,0 +1,8 @@
+
+Hi
+
+Your Nexus IQ token will expire in 7 days and will be deleted.
+
+Please contact your system administrator to create a new token
+
+Thank you

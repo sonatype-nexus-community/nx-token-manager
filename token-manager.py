@@ -6,6 +6,8 @@ import argparse
 import requests
 from datetime import datetime
 import pprint
+import smtplib
+from email.message import EmailMessage
 
 iq_api = 'api/v2'
 
@@ -13,18 +15,25 @@ currentuser_token_endpoint = 'userTokens/currentUser'
 currentuser_hastoken_endpoint = 'userTokens/currentUser/hasToken'
 expired_tokens_file= "./expire-tokens.json"
 
+notification_message_file = './notification_message.txt'
+email_sender = "sola@me.com"
+smtp_host = 'localhost'
+smtp_port = 1025
+
+
 def get_args():
     
-    global iq_server, iq_user, iq_passwd, mode, iq_realm, age
+    global iq_server, iq_user, iq_passwd, mode, iq_realm, age, expired_tokens_file
 
     parser = argparse.ArgumentParser(description='Manage your Nexus IQ tokens')
 
     parser.add_argument('-s', '--server', help='', default='http://localhost:8070', required=False)
     parser.add_argument('-u', '--user', default='admin', help='', required=False)
     parser.add_argument('-p', '--passwd', default='admin123', required=False)
-    parser.add_argument('-m', '--mode', help='', default='listx', required=False) # create, list, delete, delete_expired
+    parser.add_argument('-m', '--mode', help='', default='listx', required=False) # create, list, delete, delete_expired,notify
     parser.add_argument('-r', '--realm', help='', default='Internal', required=False) # SAML, Crowd, <LDAP Server Id>
     parser.add_argument('-a', '--age', default=365, type=int, required=False) # expiry age
+    parser.add_argument('-f', '--tokens_file', default="./expire-tokens.json", required=False) # list of expired tokens
 
     args = vars(parser.parse_args())
 
@@ -34,6 +43,7 @@ def get_args():
     mode = args['mode']
     iq_realm = args['realm']
     age = args['age']
+    expired_tokens_file = args['tokens_file']
 
     return
 
@@ -171,6 +181,48 @@ def delete_expired_tokens():
     return
 
 
+def send_notifications():
+    print("Reading expired tokens from file: " + expired_tokens_file)
+
+    f = open(expired_tokens_file)
+    tokens = json.load(f)
+
+    for token in tokens:
+        user_code = token['userCode']
+        user_name = token['username']
+
+        endpoint = 'users/' + user_name
+
+        status_code, data = http_request('get', endpoint)
+
+        if status_code == 200:
+            email_address = data["email"]
+            print ("Got email address for " + user_name + "[" + email_address + "]")
+
+            send_expiry_notification(user_name, email_address)
+
+    return
+
+
+def send_expiry_notification(user_name, email_address):
+    # Start test smtp server: 'python3 -m smtpd -c DebuggingServer -n localhost:1025'
+
+
+    with open(notification_message_file) as fp:
+        msg = EmailMessage()
+        msg.set_content(fp.read())
+
+    msg['Subject'] = 'Nexus IQ token expiry'
+    msg['From'] = email_sender
+    msg['To'] = email_address
+
+    s = smtplib.SMTP(smtp_host, smtp_port)
+    s.send_message(msg)
+    s.quit()
+
+    return
+
+
 def dump_to_file(json_data):
     #pretty_print_json = pprint.pformat(json_data).replace("'", '"')
     with open(expired_tokens_file, 'w') as fd:
@@ -204,6 +256,9 @@ def main():
 
         case 'delete_expired':
             delete_expired_tokens()
+
+        case 'notify':
+            send_notifications()
 
         case _:
             print("invalid mode")

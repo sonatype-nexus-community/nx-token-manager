@@ -12,6 +12,7 @@ Python 3.10+
 - -m = listx (list 'expired' tokens)
 - -r = Internal (IQ Authentication realm)
 - -a = 365 (period at which tokens expire - days)
+- -f = ./expire-tokens.json
 
 ### Examples
 
@@ -37,7 +38,7 @@ python3 nxiq-token-manager -m delete_expired
 ```
 #### Create a token (with default admin user credentials and server)
 ```bash
-python3 nxiq-token-manager -create
+python3 nxiq-token-manager -m create
 ```
 #### Create a token for a local user
 ```bash
@@ -47,7 +48,10 @@ python3 nxiq-token-manager -m create -u sotudeko -p my password -s http://iqserv
 ```bash
 python3 nxiq-token-manager -m create -u sotudeko -p my password -s http://iqserver:8070 -r SAML
 ```
-
+#### Send notification email to owners of expiring tokens
+```bash
+python3 nxiq-token-manager -m notify 
+```
 
 
 
