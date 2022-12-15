@@ -1,31 +1,30 @@
 
 # python 3.10+
 
-import sys
 import json
 import argparse
 import requests
 from datetime import datetime
+import pprint
 
 iq_api = 'api/v2'
 
 currentuser_token_endpoint = 'userTokens/currentUser'
 currentuser_hastoken_endpoint = 'userTokens/currentUser/hasToken'
-
+expired_tokens_file= "./expire-tokens.json"
 
 def get_args():
     
-    global iq_server, iq_user, iq_passwd, mode, iq_realm, expire, age
+    global iq_server, iq_user, iq_passwd, mode, iq_realm, age
 
     parser = argparse.ArgumentParser(description='Manage your Nexus IQ tokens')
 
     parser.add_argument('-s', '--server', help='', default='http://localhost:8070', required=False)
     parser.add_argument('-u', '--user', default='admin', help='', required=False)
     parser.add_argument('-p', '--passwd', default='admin123', required=False)
-    parser.add_argument('-m', '--mode', help='', default='list', required=False)
+    parser.add_argument('-m', '--mode', help='', default='listx', required=False) # create, list, delete, delete_expired
     parser.add_argument('-r', '--realm', help='', default='Internal', required=False) # SAML, Crowd, <LDAP Server Id>
-    parser.add_argument('-x', '--expire', action='store_true')
-    parser.add_argument('-a', '--age', default=365, type=int, required=False)
+    parser.add_argument('-a', '--age', default=365, type=int, required=False) # expiry age
 
     args = vars(parser.parse_args())
 
@@ -34,7 +33,6 @@ def get_args():
     iq_passwd = args['passwd']
     mode = args['mode']
     iq_realm = args['realm']
-    expire = args['expire']
     age = args['age']
 
     return
@@ -70,7 +68,8 @@ def http_request(verb, end_point):
 
 
 def user_has_token():
-    status = ""
+    status = False
+
     status_code, data = http_request('get', currentuser_hastoken_endpoint)
 
     if status_code == 200:
@@ -89,7 +88,6 @@ def user_has_token():
 def create_token():
 
     if not user_has_token():
-
         status_code, data = http_request('post', currentuser_token_endpoint)
 
         if status_code == 200:
@@ -98,11 +96,13 @@ def create_token():
     return
 
 
-def delete_token(endpoint):
-    status_code, data = http_request('delete', currentuser_token_endpoint)
+def delete_currentuser_token():
 
-    if status_code == 204:
-        print("Token successfully deleted")
+    if user_has_token():
+        status_code, data = http_request('delete', currentuser_token_endpoint)
+
+        if status_code == 204:
+            print("Token successfully deleted")
 
     return
 
@@ -112,7 +112,7 @@ def get_tokens(filter):
     endpoint = ""
 
     match filter:
-        case 'for_expiry':
+        case 'expired':
             search_date = get_query_date()
             endpoint = 'userTokens?createdBefore=' + search_date + '?realm=' + iq_realm
 
@@ -151,21 +151,31 @@ def get_query_date():
     return previous_dt_str
 
 
-def expire_tokens(tokens):
+def delete_expired_tokens():
+    print("Reading expired tokens from file: " + expired_tokens_file)
+
+    f = open(expired_tokens_file)
+    tokens = json.load(f)
 
     for token in tokens:
         print(token)
+        user_code = token['userCode']
+        user_name = token['username']
 
-        if expire:
-            user_code = token['userCode']
-            user_name = token['username']
+        print("Removing token [username=" + user_name + "] [userCode=" + user_code + "]")
 
-            endpoint = 'userTokens/userCode/' + user_code
+        endpoint = 'userTokens/userCode/' + user_code
 
-            print("Removing token [username=" + user_name + "] [userCode=" + user_code + "]")
-            delete_token(currentuser_token_endpoint)
+        status_code, data = http_request('delete', endpoint)
 
     return
+
+
+def dump_to_file(json_data):
+    #pretty_print_json = pprint.pformat(json_data).replace("'", '"')
+    with open(expired_tokens_file, 'w') as fd:
+        json.dump(json_data, fd)
+
 
 
 def main():
@@ -176,21 +186,27 @@ def main():
             create_token()
         
         case 'delete':
-            if user_has_token():
-                delete_token(currentuser_token_endpoint)
-
-        case 'expire':
-            tokens = get_tokens('for_expiry')
-            expire_tokens(tokens)
+            delete_currentuser_token()
 
         case 'list':
             tokens = get_tokens('all')
+
             for token in tokens:
                 print(token)
 
+        case 'listx':
+            tokens = get_tokens('expired')
+
+            for token in tokens:
+                print(token)
+
+            dump_to_file(tokens)
+
+        case 'delete_expired':
+            delete_expired_tokens()
+
         case _:
             print("invalid mode")
-
 
 
 if __name__ == "__main__":
