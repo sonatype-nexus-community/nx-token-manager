@@ -27,7 +27,7 @@ python3 nxiq-token-manager
 ```bash
 python3 nxiq-token-manager -a 30
 ```
-#### List all tokens that are 'expired' at 1 year old or older using SAML authentication (with defaults)
+#### List all tokens that are 'expired' at 1 year old or older for SAML users (with defaults)
 ```bash
 python3 nxiq-token-manager -r SAML
 ```
