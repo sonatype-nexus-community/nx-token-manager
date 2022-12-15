@@ -24,7 +24,7 @@ def get_args():
     parser.add_argument('-p', '--passwd', default='admin123', required=False)
     parser.add_argument('-m', '--mode', help='', default='list', required=False)
     parser.add_argument('-r', '--realm', help='', default='Internal', required=False) # SAML, Crowd, <LDAP Server Id>
-    parser.add_argument('-e', '--expire', action='store_true')
+    parser.add_argument('-x', '--expire', action='store_true')
     parser.add_argument('-a', '--age', default=365, type=int, required=False)
 
     args = vars(parser.parse_args())
@@ -108,6 +108,7 @@ def delete_token(endpoint):
 
 
 def get_tokens(filter):
+    tokens = []
     endpoint = ""
 
     match filter:
