@@ -6,13 +6,13 @@ Python 3.10+
 
 ### Defaults
 
-User (-u) = admin
-Password (-p) = admin123
-Server (-s) = http://localhost:8070
-Mode (-m) = list
-IQ Authentication realm (-r) = Internal
-Expire (-x) = False
-Age (-a) = 365 (days)
+- User (-u) = admin
+- Password (-p) = admin123
+- Server (-s) = http://localhost:8070
+- Mode (-m) = list
+- IQ Authentication realm (-r) = Internal
+- Expire (-x) = False
+- Age (-a) = 365 (days)
 
 ### Examples
 
