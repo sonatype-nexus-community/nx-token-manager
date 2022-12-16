@@ -64,7 +64,7 @@ python3 nxiq-token-manager -m notify
 ```
 
 
-###Disclaimer
+### Disclaimer
 
 The script in this repository is NOT SUPPORTED by Sonatype, and is a contribution of ours to the open source community (read: you!)
 
