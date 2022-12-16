@@ -12,7 +12,7 @@ Python 3.10+
 - -m = list (list all tokens) [listx|create|delete|delete_expired|notify]
 - -r = Internal (IQ Authentication realm) [SAML|Crowd|<LDAP Server Id>]
 - -a = 365 (period at which tokens expire - days)
-- -f = ./expire-tokens.json (listing 'expired' tokens with '-m listx' also writes them to this file)
+- -f = ./expire-tokens.json (listing 'expired' tokens with '-m listx' writes them to this file)
 
 ### Examples
 
