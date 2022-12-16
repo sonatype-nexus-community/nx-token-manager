@@ -32,9 +32,9 @@ python3 nxiq-token-manager -m listx -a 30
 ```bash
 python3 nxiq-token-manager -m listx -r SAML
 ```
-#### Remove 'expired' tokens (with defaults)
+#### Remove 'expired' tokens (with defaults). Reads the tokens from the file in -f
 ```bash
-python3 nxiq-token-manager -m delete_expired (reads the tokens from the file in -f)
+python3 nxiq-token-manager -m delete_expired 
 ```
 #### Create a token (with default admin user credentials and server)
 ```bash
@@ -48,7 +48,7 @@ python3 nxiq-token-manager -m create -u sotudeko -p my password -s http://iqserv
 ```bash
 python3 nxiq-token-manager -m create -u sotudeko -p my password -s http://iqserver:8070 -r SAML
 ```
-#### Send notification email to owners of expiring tokens (reads the tokens from the file in -f)
+#### Send notification email to owners of expiring tokens. Reads the tokens from the file in -f)
 ```bash
 python3 nxiq-token-manager -m notify 
 ```
