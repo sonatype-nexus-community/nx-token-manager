@@ -16,7 +16,7 @@ currentuser_hastoken_endpoint = 'userTokens/currentUser/hasToken'
 expired_tokens_file= "./expire-tokens.json"
 
 notification_message_file = './notification_message.txt'
-email_sender = "sola@me.com"
+email_sender = "none@none.com"
 smtp_host = 'localhost'
 smtp_port = 1025
 
@@ -205,8 +205,8 @@ def send_notifications():
 
 
 def send_expiry_notification(user_name, email_address):
-    # Start test smtp server: 'python3 -m smtpd -c DebuggingServer -n localhost:1025'
-
+    # Start a test smtp server if required:
+    #  python3 -m smtpd -c DebuggingServer -n localhost:1025
 
     with open(notification_message_file) as fp:
         msg = EmailMessage()
