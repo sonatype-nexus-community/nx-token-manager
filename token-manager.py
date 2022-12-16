@@ -30,7 +30,7 @@ def get_args():
     parser.add_argument('-s', '--server', help='', default='http://localhost:8070', required=False)
     parser.add_argument('-u', '--user', default='admin', help='', required=False)
     parser.add_argument('-p', '--passwd', default='admin123', required=False)
-    parser.add_argument('-m', '--mode', help='', default='listx', required=False) # create, list, delete, delete_expired,notify
+    parser.add_argument('-m', '--mode', help='', default='list', required=False) # create, listx, delete, delete_expired,notify
     parser.add_argument('-r', '--realm', help='', default='Internal', required=False) # SAML, Crowd, <LDAP Server Id>
     parser.add_argument('-a', '--age', default=365, type=int, required=False) # expiry age
     parser.add_argument('-f', '--tokens_file', default="./expire-tokens.json", required=False) # list of expired tokens
