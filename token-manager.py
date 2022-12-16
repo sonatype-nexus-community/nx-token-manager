@@ -33,7 +33,7 @@ def get_args():
     parser.add_argument('-m', '--mode', help='', default='list', required=False) # create, listx, delete, delete_expired,notify
     parser.add_argument('-r', '--realm', help='', default='Internal', required=False) # SAML, Crowd, <LDAP Server Id>
     parser.add_argument('-a', '--age', default=365, type=int, required=False) # expiry age
-    parser.add_argument('-f', '--tokens_file', default="./expire-tokens.json", required=False) # list of expired tokens
+    parser.add_argument('-f', '--tokens_file', default="./expire-tokens.json", required=False) # will contain list of expired tokens
 
     args = vars(parser.parse_args())
 
