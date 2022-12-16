@@ -63,6 +63,7 @@ Don't worry, using this community item does not "void your warranty". In a worst
 Please remember:
 
 This purpose of this script to provide an example of using the API for automating managing Nexus IQ tokens
+Please take a copy and adapt for your own use cases
 Use this contribution at the risk tolerance that you have
 Do NOT file Sonatype support tickets related to this script
 DO file issues here on GitHub, so that the community can pitch in
