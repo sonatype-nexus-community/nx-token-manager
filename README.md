@@ -28,27 +28,27 @@ Python 3.10+
 
 #### List all tokens (with defaults)
 ```bash
-python3 nxiq-token-manager
+python3 nxiq-token-manager.py
 ````
 #### List all tokens that are 'expired' after 1 year old or older (with defaults). Writes the tokens from the file in -f
 ```bash
-python3 nxiq-token-manager -m listx
+python3 nxiq-token-manager.py -m listx
 ```
 #### List all tokens that are 'expired' after 30 days or older (with defaults). Writes the tokens from the file in -f
 ```bash
-python3 nxiq-token-manager -m listx -a 30
+python3 nxiq-token-manager.py -m listx -a 30
 ```
 #### List all tokens that are 'expired' after 1 year old or older for SAML users (with defaults). Writes the tokens from the file in -f
 ```bash
-python3 nxiq-token-manager -m listx -r SAML
+python3 nxiq-token-manager.py -m listx -r SAML
 ```
 #### Remove 'expired' tokens (with defaults). Reads the tokens from the file in -f
 ```bash
-python3 nxiq-token-manager -m delete_expired 
+python3 nxiq-token-manager.py -m delete_expired 
 ```
 #### Create a token (with default admin user credentials and server)
 ```bash
-python3 nxiq-token-manager -m create
+python3 nxiq-token-manager.py -m create
 ```
 #### Create a token for a local user
 ```bash
@@ -56,11 +56,11 @@ python3 nxiq-token-manager -m create -u sotudeko -p my password -s http://iqserv
 ```
 #### Create a token for a SAML user
 ```bash
-python3 nxiq-token-manager -m create -u sotudeko -p my password -s http://iqserver:8070 -r SAML
+python3 nxiq-token-manager.py -m create -u sotudeko -p my password -s http://iqserver:8070 -r SAML
 ```
 #### Send notification email to owners of expiring tokens. Reads the tokens from the file in -f
 ```bash
-python3 nxiq-token-manager -m notify 
+python3 nxiq-token-manager.py -m notify 
 ```
 
 
