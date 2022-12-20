@@ -151,18 +151,17 @@ def get_tokens(filter):
 def get_query_date_before():
     oneday = 86400 # seconds
 
-    current_dt = datetime.now()
-    current_ts = datetime.timestamp(current_dt)
+    current_dt = datetime.datetime.now()
+    current_ts = datetime.datetime.timestamp(current_dt)
+    current_dt_str = current_dt.strftime("%Y-%m-%d")
 
     previous_ts = current_ts - (age * oneday)
 
-    previous_dt = datetime.fromtimestamp(previous_ts)
-    previous_dt_str = previous_dt.strftime("%Y-%d-%m")
+    previous_dt = datetime.datetime.fromtimestamp(previous_ts)
+    previous_dt_str = previous_dt.strftime("%Y-%m-%d")
 
-    print("The current date and time is:", current_dt)
-    print("The current timestamp (secs) is:", current_ts)
-    print("The previous date and time:", previous_dt)
-    print("The previous timestamp (secs) is:", previous_ts)
+    print("The current date and time is:", current_dt_str)
+    print("The previous date and time:", previous_dt_str)
     print("Will search for tokens created before '" + previous_dt_str + "'")
 
     return previous_dt_str
