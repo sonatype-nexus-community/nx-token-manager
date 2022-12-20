@@ -2,7 +2,7 @@
 
 #### Nexus IQ
 
-[nxiq-token-manager](https://www.example.com)
+[nxiq-token-manager](https://github.com/sotudeko/nx-token-manager/tree/main/nxiq)
 
 ### Disclaimer
 
