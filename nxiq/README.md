@@ -64,7 +64,7 @@ python3 nxiq-token-manager.py -m notify
 ```
 
 
-### [The Fine Print](https://github.com/sonatype-nexus-community/nx-token-manager)
+### [The Fine Print](https://github.com/sonatype-nexus-community/nx-token-manager#the-fine-print)
 
 
 
