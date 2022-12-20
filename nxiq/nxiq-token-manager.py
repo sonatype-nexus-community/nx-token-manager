@@ -4,7 +4,7 @@
 import json
 import argparse
 import requests
-from datetime import datetime
+import datetime
 import pprint
 import smtplib
 from email.message import EmailMessage
@@ -13,7 +13,6 @@ iq_api = 'api/v2'
 
 currentuser_token_endpoint = 'userTokens/currentUser'
 currentuser_hastoken_endpoint = 'userTokens/currentUser/hasToken'
-expired_tokens_file= "./expire-tokens.json"
 
 notification_message_file = './notification_message.txt'
 email_sender = "none@none.com"
@@ -23,17 +22,18 @@ smtp_port = 1025
 
 def get_args():
     
-    global iq_server, iq_user, iq_passwd, mode, iq_realm, age, expired_tokens_file
+    global iq_server, iq_user, iq_passwd, mode, iq_realm, age, expired_tokens_file, created_on
 
     parser = argparse.ArgumentParser(description='Manage your Nexus IQ tokens')
 
     parser.add_argument('-s', '--server', help='', default='http://localhost:8070', required=False)
     parser.add_argument('-u', '--user', default='admin', help='', required=False)
     parser.add_argument('-p', '--passwd', default='admin123', required=False)
-    parser.add_argument('-m', '--mode', help='', default='list', required=False) # create, listx, delete, delete_expired,notify
+    parser.add_argument('-m', '--mode', help='', default='list', required=False) # create,listx,delete,delete_expired,notify
     parser.add_argument('-r', '--realm', help='', default='Internal', required=False) # SAML, Crowd, <LDAP Server Id>
-    parser.add_argument('-a', '--age', default=365, type=int, required=False) # expiry age
+    parser.add_argument('-a', '--age', default=365, type=int, required=False) # expiry age (mutually exclusive with before/after flags
     parser.add_argument('-f', '--tokens_file', default="./expire-tokens.json", required=False) # will contain list of expired tokens
+    parser.add_argument('--created_on', required=False) # find tokens created on this date
 
     args = vars(parser.parse_args())
 
@@ -44,6 +44,7 @@ def get_args():
     iq_realm = args['realm']
     age = args['age']
     expired_tokens_file = args['tokens_file']
+    created_on = args['created_on']
 
     return
 
@@ -123,11 +124,15 @@ def get_tokens(filter):
 
     match filter:
         case 'expired':
-            search_date = get_query_date()
-            endpoint = 'userTokens?createdBefore=' + search_date + '?realm=' + iq_realm
+            date_before = get_query_date_before()
+            endpoint = 'userTokens?createdBefore=' + date_before + '?realm=' + iq_realm
 
         case 'all':
             endpoint = 'userTokens?realm=' + iq_realm
+
+        case 'created_on':
+            date_after, date_before = get_query_date_range(created_on)
+            endpoint = 'userTokens?createdAfter=' + date_after + '?createdBefore=' + date_before + '?realm=' + iq_realm
 
         case _:
             print ("invalid filter for token search")
@@ -137,28 +142,46 @@ def get_tokens(filter):
     if status_code == 200:
         tokens = data
 
+    for token in tokens:
+        print(token)
+
     return tokens
 
 
-def get_query_date():
+def get_query_date_before():
     oneday = 86400 # seconds
 
     current_dt = datetime.now()
     current_ts = datetime.timestamp(current_dt)
-
-    print("The current date and time is:", current_dt)
-    print("The current timestamp (secs) is:", current_ts)
 
     previous_ts = current_ts - (age * oneday)
 
     previous_dt = datetime.fromtimestamp(previous_ts)
     previous_dt_str = previous_dt.strftime("%Y-%d-%m")
 
+    print("The current date and time is:", current_dt)
+    print("The current timestamp (secs) is:", current_ts)
     print("The previous date and time:", previous_dt)
     print("The previous timestamp (secs) is:", previous_ts)
     print("Will search for tokens created before '" + previous_dt_str + "'")
 
     return previous_dt_str
+
+
+def get_query_date_range(created_on):
+    # created_on = yyyy-mm-dd
+    date_format = "%Y-%m-%d"
+
+    date_after = datetime.datetime.strptime(created_on, date_format) - datetime.timedelta(days=1)
+    date_before = datetime.datetime.strptime(created_on, date_format) + datetime.timedelta(days=1)
+
+    date_after_str = str(date_after.strftime(date_format))
+    date_before_str = str(date_before.strftime(date_format))
+
+    print("The query date is:", created_on)
+    print("Will search for tokens created after '" + date_after_str + "'" + " and before '" + date_before_str + "'")
+
+    return date_after_str, date_before_str
 
 
 def delete_expired_tokens():
@@ -229,39 +252,34 @@ def dump_to_file(json_data):
         json.dump(json_data, fd)
 
 
-
 def main():
     get_args()
 
-    match mode:
-        case 'create':
-            create_token()
-        
-        case 'delete':
-            delete_currentuser_token()
+    if created_on is not None:
+        tokens = get_tokens('created_on')
+    else:
+        match mode:
+            case 'create':
+                create_token()
 
-        case 'list':
-            tokens = get_tokens('all')
+            case 'delete':
+                delete_currentuser_token()
 
-            for token in tokens:
-                print(token)
+            case 'list':
+                tokens = get_tokens('all')
 
-        case 'listx':
-            tokens = get_tokens('expired')
+            case 'listx':
+                tokens = get_tokens('expired')
+                dump_to_file(tokens)
 
-            for token in tokens:
-                print(token)
+            case 'delete_expired':
+                delete_expired_tokens()
 
-            dump_to_file(tokens)
+            case 'notify':
+                send_notifications()
 
-        case 'delete_expired':
-            delete_expired_tokens()
-
-        case 'notify':
-            send_notifications()
-
-        case _:
-            print("invalid mode")
+            case _:
+                print("invalid mode")
 
 
 if __name__ == "__main__":
