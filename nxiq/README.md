@@ -64,22 +64,7 @@ python3 nxiq-token-manager.py -m notify
 ```
 
 
-### Disclaimer
-
-The script in this repository is NOT SUPPORTED by Sonatype, and is a contribution of ours to the open source community (read: you!)
-
-Don't worry, using this community item does not "void your warranty". In a worst case scenario, you may be asked by the Sonatype Support team to remove the community item in order to determine the root cause of any issues.
-
-Please remember:
-
-This purpose of this script to provide an example of using the Nexus IQ API to automate managing Nexus IQ tokens.
-Please take a copy and adapt for your own use cases.
-
-Use this contribution at the risk tolerance that you have.
-
-Do NOT file Sonatype support tickets related to this script
-
-DO file issues here on GitHub, so that the community can pitch in
+### [The Fine Print](https://github.com/sonatype-nexus-community/nx-token-manager)
 
 
 
