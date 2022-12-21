@@ -29,9 +29,9 @@ def get_args():
 
     parser = argparse.ArgumentParser(description='Manage your Nexus IQ tokens')
 
-    parser.add_argument('-s', '--server', help='', default='http://localhost:8070', required=False)
-    parser.add_argument('-u', '--user', default='admin', help='', required=False)
-    parser.add_argument('-p', '--passwd', default='admin123', required=False)
+    parser.add_argument('-s', '--server', help='', required=True)
+    parser.add_argument('-u', '--user', help='', required=True)
+    parser.add_argument('-p', '--passwd', required=True)
     parser.add_argument('-r', '--realm', help='', default='Internal', required=False) # SAML, Crowd, <LDAP Server Id>
     parser.add_argument('-f', '--expired_tokens_file', default="./expire_tokens.json", required=False) # will contain list of expired tokens
 
@@ -40,9 +40,9 @@ def get_args():
     group.add_argument('--created_on', required=False) # find tokens created on this date - yyy-mm-dd
     group.add_argument('--created_since', type=int, required=False) # find tokens created since this age in days
     group.add_argument('--delete_expired', required=False) # delete 'expired' tokens
+    group.add_argument('--create_token', required=False) # create a token
+    group.add_argument('--delete_token', required=False) # delete a token
     group.add_argument('--list_all', action="store_true", required=False) # list all tokens
-    group.add_argument('--create_token', action="store_true", required=False) # create a token
-    group.add_argument('--delete_token', action="store_true", required=False) # delete a token
     group.add_argument('--notify', action="store_true", required=False) # send email notification for 'expiring' tokens
 
     args = vars(parser.parse_args())
@@ -136,6 +136,7 @@ def delete_currentuser_token():
 
 
 def get_tokens(filter):
+    # the API always gets for a single realm
     tokens = []
     endpoint = ""
 
@@ -160,7 +161,7 @@ def get_tokens(filter):
         tokens = data
 
     # Todo: the query not honouring the iq_realm so this temp fix will filter in for the realm
-    tokens = filter_tokens(tokens, iq_realm)
+    # tokens = filter_tokens(tokens, iq_realm)
 
     for token in tokens:
         print(token)
@@ -304,10 +305,10 @@ def main():
         tokens = get_tokens('created_since')
         dump_to_file(tokens)
 
-    if create_token:
+    if create_token is not None:
         create_token()
 
-    if delete_token:
+    if delete_token is not None:
         delete_currentuser_token()
 
     if delete_expired is not None:
