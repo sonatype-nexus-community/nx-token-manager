@@ -171,14 +171,13 @@ def get_query_date_range(created_on):
     # created_on = yyyy-mm-dd
     date_format = "%Y-%m-%d"
 
-    date_after = datetime.datetime.strptime(created_on, date_format) - datetime.timedelta(days=1)
-    date_before = datetime.datetime.strptime(created_on, date_format) + datetime.timedelta(days=1)
+    date_after_str = created_on
 
-    date_after_str = str(date_after.strftime(date_format))
+    date_before = datetime.datetime.strptime(created_on, date_format) + datetime.timedelta(days=1)
     date_before_str = str(date_before.strftime(date_format))
 
     print("The query date is:", created_on)
-    print("Will search for tokens created after '" + date_after_str + "'" + " and before '" + date_before_str + "'")
+    print("Will search for tokens created on and after '" + date_after_str + "'" + " and before '" + date_before_str + "'")
 
     return date_after_str, date_before_str
 

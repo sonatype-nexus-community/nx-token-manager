@@ -38,10 +38,6 @@ python3 nxiq-token-manager.py -m listx
 ```bash
 python3 nxiq-token-manager.py -m listx -a 30
 ```
-#### List all tokens created on '16 Dec 2022'
-```bash
-python3 nxiq-token-manager.py --created_on 2022-12-16
-```
 #### List all tokens that are 'expired' after 1 year old or older for SAML users (with defaults). Writes the tokens from the file in -f
 ```bash
 python3 nxiq-token-manager.py -m listx -r SAML
