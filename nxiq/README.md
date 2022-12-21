@@ -37,15 +37,15 @@ python3 nxiq-token-manager.py --list_all -u admin -p admin123 -s http://localhos
 ```bash
 python3 nxiq-token-manager.py --created_on 2022-03-07 -u admin -p admin123 -s http://localhost:8070
 ````
-#### List all local user tokens that are 'expired' after 1 year old or older. Writes the tokens from the file in -f
+#### List all local user tokens that are 'expired' after 1 year old or older. Writes the tokens to the file in -f
 ```bash
 python3 nxiq-token-manager.py --created_since 365 -u admin -p admin123 -s http://localhost:8070
 ```
-#### List all local user tokens that are 'expired' after 30 days or older Writes the tokens from the file in -f
+#### List all local user tokens that are 'expired' after 30 days or older Writes the tokens to the file in -f
 ```bash
 python3 nxiq-token-manager.py --created_since 30 -u admin -p admin123 -s http://localhost:8070
 ```
-#### List all tokens that are 'expired' after 1 year old or older for SAML users. Writes the tokens from the file in -f
+#### List all tokens that are 'expired' after 1 year old or older for SAML users. Writes the tokens to the file in -f
 ```bash
 python3 nxiq-token-manager.py ---created_since 365 -r SAML -u admin -p admin123 -s http://localhost:8070
 ```
