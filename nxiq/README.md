@@ -6,9 +6,7 @@ Create, delete and list Nexus IQ user tokens.
 This script also allows the user to find and delete 'expired' tokens.
 
 &#9888; Nexus IQ does not currently provide any token expiry function.
-An 'expired' token is simply a token older than a user-defined period of time at runtime of this script.
-
-By default, the age of a token is set to one year.
+An 'expired' token is simply a token older than a user-defined time period provided at runtime of this script.
 
 ### Prerequisites
 
