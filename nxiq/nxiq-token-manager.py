@@ -160,23 +160,10 @@ def get_tokens(filter):
     if status_code == 200:
         tokens = data
 
-    # Todo: the query not honouring the iq_realm so this temp fix will filter in for the realm
-    # tokens = filter_tokens(tokens, iq_realm)
-
     for token in tokens:
         print(token)
 
     return tokens
-
-
-def filter_tokens(tokens, filter):
-    filtered = []
-
-    for token in tokens:
-        if token['realm'] == filter:
-            filtered.append(token)
-
-    return filtered
 
 
 def get_query_date_before():
