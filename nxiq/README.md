@@ -19,8 +19,8 @@ Python 3.10+
 
 ### Additional argumemts (these are mutually exclusive)
 
-- --created_on <date in yyy-mm-dd format> - find tokens created on this date - 
-- --created_since <number of days> - find tokens created since this age in days
+- --created_on <date in yyy-mm-dd format> - find tokens created on this date
+- --created_before <number of days> - find tokens created before this age
 - --delete_expired - delete 'expired' tokens  (boolean)
 - --list_all - list all tokens (boolean)
 - --create_token - create a token (boolean)
@@ -39,15 +39,15 @@ python3 nxiq-token-manager.py --created_on 2022-03-07 -u admin -p admin123 -s ht
 ````
 #### List all local user tokens that are 'expired' after 1 year old or older. Writes the tokens to the file in -f
 ```bash
-python3 nxiq-token-manager.py --created_since 365 -u admin -p admin123 -s http://localhost:8070
+python3 nxiq-token-manager.py --created_before 365 -u admin -p admin123 -s http://localhost:8070
 ```
 #### List all local user tokens that are 'expired' after 30 days or older Writes the tokens to the file in -f
 ```bash
-python3 nxiq-token-manager.py --created_since 30 -u admin -p admin123 -s http://localhost:8070
+python3 nxiq-token-manager.py --created_before 30 -u admin -p admin123 -s http://localhost:8070
 ```
 #### List all tokens that are 'expired' after 1 year old or older for SAML users. Writes the tokens to the file in -f
 ```bash
-python3 nxiq-token-manager.py ---created_since 365 -r SAML -u admin -p admin123 -s http://localhost:8070
+python3 nxiq-token-manager.py ---created_before 365 -r SAML -u admin -p admin123 -s http://localhost:8070
 ```
 #### Remove 'expired' tokens. Reads the tokens from the file in -f
 ```bash

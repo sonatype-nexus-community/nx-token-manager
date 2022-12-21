@@ -25,7 +25,7 @@ smtp_port = 1025
 
 def get_args():
     
-    global iq_server, iq_user, iq_passwd, iq_realm, expired_tokens_file, created_on, created_since, delete_expired, list_all, create_token, delete_token, notify
+    global iq_server, iq_user, iq_passwd, iq_realm, expired_tokens_file, created_on, created_before, delete_expired, list_all, create_token, delete_token, notify
 
     parser = argparse.ArgumentParser(description='Manage your Nexus IQ tokens')
 
@@ -38,7 +38,7 @@ def get_args():
     # only one of the following
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--created_on', required=False) # find tokens created on this date - yyy-mm-dd
-    group.add_argument('--created_since', type=int, required=False) # find tokens created since this age in days
+    group.add_argument('--created_before', type=int, required=False) # find tokens created before this age in days
     group.add_argument('--delete_expired', required=False) # delete 'expired' tokens
     group.add_argument('--create_token', required=False) # create a token
     group.add_argument('--delete_token', required=False) # delete a token
@@ -54,7 +54,7 @@ def get_args():
     expired_tokens_file = args['expired_tokens_file']
 
     created_on = args['created_on']
-    created_since = args['created_since']
+    created_before = args['created_before']
     delete_expired = args['delete_expired']
     list_all = args['list_all']
     create_token = args['create_token']
@@ -144,7 +144,7 @@ def get_tokens(filter):
         case 'list_all':
             endpoint = 'userTokens?realm=' + iq_realm
 
-        case 'created_since':
+        case 'created_before':
             date_before = get_query_date_before()
             endpoint = 'userTokens?createdBefore=' + date_before + '?realm=' + iq_realm
 
@@ -173,7 +173,7 @@ def get_query_date_before():
     current_ts = datetime.datetime.timestamp(current_dt)
     current_dt_str = current_dt.strftime("%Y-%m-%d")
 
-    previous_ts = current_ts - (created_since * oneday)
+    previous_ts = current_ts - (created_before * oneday)
 
     previous_dt = datetime.datetime.fromtimestamp(previous_ts)
     previous_dt_str = previous_dt.strftime("%Y-%m-%d")
@@ -288,8 +288,8 @@ def main():
     if created_on is not None:
         get_tokens('created_on')
 
-    if created_since is not None:
-        tokens = get_tokens('created_since')
+    if created_before is not None:
+        tokens = get_tokens('created_before')
         dump_to_file(tokens)
 
     if create_token is not None:
