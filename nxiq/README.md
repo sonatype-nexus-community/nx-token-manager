@@ -21,7 +21,7 @@ Python 3.10+
 - -s = http://localhost:8070 (Nexus IQ server url)
 - -m = list (list all tokens) [listx|create|delete|delete_expired|notify]
 - -r = Internal (IQ Authentication realm) [SAML|Crowd|<LDAP Server Id>]
-- -a = 365 (age after which a token expires - days)
+- -a = 365 (age after which a token expires - days. Use this option with *-m listx*)
 - -f = ./expire-tokens.json (listing 'expired' tokens with '-m listx' writes them to this file)
 
 ### Examples

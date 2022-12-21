@@ -2,6 +2,7 @@
 # python 3.10+
 
 import json
+import os
 import argparse
 import requests
 import datetime
@@ -15,6 +16,8 @@ currentuser_token_endpoint = 'userTokens/currentUser'
 currentuser_hastoken_endpoint = 'userTokens/currentUser/hasToken'
 
 notification_message_file = './notification_message.txt'
+
+# test SMTP server (edit accordingly)
 email_sender = "none@none.com"
 smtp_host = 'localhost'
 smtp_port = 1025
@@ -22,29 +25,41 @@ smtp_port = 1025
 
 def get_args():
     
-    global iq_server, iq_user, iq_passwd, mode, iq_realm, age, expired_tokens_file, created_on
+    global iq_server, iq_user, iq_passwd, iq_realm, expired_tokens_file, created_on, created_since, delete_expired, list_all, create_token, delete_token, notify
 
     parser = argparse.ArgumentParser(description='Manage your Nexus IQ tokens')
 
     parser.add_argument('-s', '--server', help='', default='http://localhost:8070', required=False)
     parser.add_argument('-u', '--user', default='admin', help='', required=False)
     parser.add_argument('-p', '--passwd', default='admin123', required=False)
-    parser.add_argument('-m', '--mode', help='', default='list', required=False) # create,listx,delete,delete_expired,notify
     parser.add_argument('-r', '--realm', help='', default='Internal', required=False) # SAML, Crowd, <LDAP Server Id>
-    parser.add_argument('-a', '--age', default=365, type=int, required=False) # expiry age (mutually exclusive with before/after flags
-    parser.add_argument('-f', '--tokens_file', default="./expire-tokens.json", required=False) # will contain list of expired tokens
-    parser.add_argument('--created_on', required=False) # find tokens created on this date
+    parser.add_argument('-f', '--expired_tokens_file', default="./expire_tokens.json", required=False) # will contain list of expired tokens
+
+    # only one of the following
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--created_on', required=False) # find tokens created on this date - yyy-mm-dd
+    group.add_argument('--created_since', type=int, required=False) # find tokens created since this age in days
+    group.add_argument('--delete_expired', required=False) # delete 'expired' tokens
+    group.add_argument('--list_all', action="store_true", required=False) # list all tokens
+    group.add_argument('--create_token', action="store_true", required=False) # create a token
+    group.add_argument('--delete_token', action="store_true", required=False) # delete a token
+    group.add_argument('--notify', action="store_true", required=False) # send email notification for 'expiring' tokens
 
     args = vars(parser.parse_args())
 
     iq_server = args['server']
     iq_user = args['user']
     iq_passwd = args['passwd']
-    mode = args['mode']
     iq_realm = args['realm']
-    age = args['age']
-    expired_tokens_file = args['tokens_file']
+    expired_tokens_file = args['expired_tokens_file']
+
     created_on = args['created_on']
+    created_since = args['created_since']
+    delete_expired = args['delete_expired']
+    list_all = args['list_all']
+    create_token = args['create_token']
+    delete_token = args['delete_token']
+    notify = args['notify']
 
     return
 
@@ -123,12 +138,12 @@ def get_tokens(filter):
     endpoint = ""
 
     match filter:
-        case 'expired':
+        case 'list_all':
+            endpoint = 'userTokens?realm=' + iq_realm
+
+        case 'created_since':
             date_before = get_query_date_before()
             endpoint = 'userTokens?createdBefore=' + date_before + '?realm=' + iq_realm
-
-        case 'all':
-            endpoint = 'userTokens?realm=' + iq_realm
 
         case 'created_on':
             date_after, date_before = get_query_date_range(created_on)
@@ -155,7 +170,7 @@ def get_query_date_before():
     current_ts = datetime.datetime.timestamp(current_dt)
     current_dt_str = current_dt.strftime("%Y-%m-%d")
 
-    previous_ts = current_ts - (age * oneday)
+    previous_ts = current_ts - (created_since * oneday)
 
     previous_dt = datetime.datetime.fromtimestamp(previous_ts)
     previous_dt_str = previous_dt.strftime("%Y-%m-%d")
@@ -185,8 +200,7 @@ def get_query_date_range(created_on):
 def delete_expired_tokens():
     print("Reading expired tokens from file: " + expired_tokens_file)
 
-    f = open(expired_tokens_file)
-    tokens = json.load(f)
+    tokens = get_expired_tokens()
 
     for token in tokens:
         print(token)
@@ -205,8 +219,7 @@ def delete_expired_tokens():
 def send_notifications():
     print("Reading expired tokens from file: " + expired_tokens_file)
 
-    f = open(expired_tokens_file)
-    tokens = json.load(f)
+    tokens = get_expired_tokens()
 
     for token in tokens:
         user_code = token['userCode']
@@ -244,6 +257,19 @@ def send_expiry_notification(user_name, email_address):
     return
 
 
+def get_expired_tokens():
+    tokens = {}
+
+    if os.path.exists(expired_tokens_file):
+        f = open(expired_tokens_file)
+        tokens = json.load(f)
+    else:
+        print ("Error: file does not exist: " + expired_tokens_file)
+        print ("Please the script with '--created-since' to create the file")
+
+    return tokens
+
+
 def dump_to_file(json_data):
     #pretty_print_json = pprint.pformat(json_data).replace("'", '"')
     with open(expired_tokens_file, 'w') as fd:
@@ -253,31 +279,30 @@ def dump_to_file(json_data):
 def main():
     get_args()
 
+    if list_all:
+        get_tokens('list_all')
+
     if created_on is not None:
-        tokens = get_tokens('created_on')
-    else:
-        match mode:
-            case 'create':
-                create_token()
+        get_tokens('created_on')
 
-            case 'delete':
-                delete_currentuser_token()
+    if created_since is not None:
+        tokens = get_tokens('created_since')
+        dump_to_file(tokens)
 
-            case 'list':
-                tokens = get_tokens('all')
+    if create_token:
+        create_token()
 
-            case 'listx':
-                tokens = get_tokens('expired')
-                dump_to_file(tokens)
+    if delete_token:
+        delete_currentuser_token()
 
-            case 'delete_expired':
-                delete_expired_tokens()
+    if delete_expired is not None:
+        delete_expired_tokens()
 
-            case 'notify':
-                send_notifications()
+    if notify:
+        send_notifications()
 
-            case _:
-                print("invalid mode")
+
+
 
 
 if __name__ == "__main__":
